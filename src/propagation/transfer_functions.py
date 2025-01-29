@@ -31,8 +31,7 @@ def compute_FSTF(input_field, output_field, dx, dy,
     return h
 
 
-def free_space_transfer_function(x: NDArray, y: NDArray, z,
-                                 wavelength, shift=False):
+def free_space_transfer_function(x, y, z, wavelength, shift=False):
     """
     This is the free space transfer function used by Joel Carpenter
 
