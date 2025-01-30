@@ -1,25 +1,14 @@
 import numpy as np
+import tensorflow as tf
 from src.propagation.transfer_functions import free_space_transfer_function
 from src.propagation.propagate import mplc_propagate, free_space_propagate
 
 
 def generate_data(k, n, m, phase_restriction, 
-                  batch_size: int = 32, 
-                  wavelength: float = 500e-9,
-                  distance: float = 0.05,
-                  dx=10e-6, dy=10e-6):
+                  input_field, h, batch_size: int = 32):
     """
     Generate pairs of inputs and modulated outputs.
     """
-
-    # Define the plane wave inputted into the system
-    input_field = np.ones((n, m))
-
-    # Generate the free space transfer function
-    x = dx * (np.arange(m) - m/2)
-    y = dy * (np.arange(n) - n/2)
-    X, Y = np.meshgrid(x, y)
-    h = free_space_transfer_function(X, Y, distance, wavelength)
 
     # Loop indefinitely, the generator never "ends"
     while True:  
@@ -33,9 +22,17 @@ def generate_data(k, n, m, phase_restriction,
             for i in range(k):
                 wavefront = mplc_propagate(wavefront, masks[i], h=h)
 
-            # Add results to inputs and outputs
-            inputs.append(wavefront)
-            outputs.append(masks)
+            # Split the wavefront into real and imaginary components
+            split_wavefront = np.zeros((n, m, 2))
+            split_wavefront[:, :, 0] = np.real(wavefront)
+            split_wavefront[:, :, 1] = np.imag(wavefront)
 
-        yield inputs, outputs
+            # Add results to inputs and outputs
+            inputs.append(split_wavefront)
+            outputs.append(np.copy(masks))
+
+        # Convert to np arrays, then yeild the input and output data
+        inputs = np.array(inputs)
+        outputs = np.array(outputs)
+        yield inputs, tf.convert_to_tensor(outputs, dtype=tf.float32)
         

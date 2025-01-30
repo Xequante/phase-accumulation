@@ -1,6 +1,7 @@
 from numpy.fft import fft2, ifft2
 from numpy import exp, arange, meshgrid
 from src.propagation.transfer_functions import free_space_transfer_function
+import tensorflow as tf
 
 
 def mplc_propagate(wavefront, mask, **kwargs):
@@ -19,7 +20,7 @@ def mplc_propagate(wavefront, mask, **kwargs):
     """
 
     # Compute the modulated wavefront
-    modulated_wavefront = wavefront * exp(1j * mask)
+    modulated_wavefront = tf.cast(wavefront, tf.complex64) * tf.exp(1j * tf.cast(mask, tf.complex64))
 
     # Compute the free space propagation
     return free_space_propagate(modulated_wavefront, **kwargs)
@@ -62,7 +63,7 @@ def free_space_propagate(wavefront, h=None,
     """
 
     # Take the Fourier transform of the wavefront
-    wavefront_ft = fft2(wavefront)
+    wavefront_ft = tf.signal.fft2d(wavefront)
 
     # Check for pre-inputted h
     if h is None:
@@ -83,4 +84,4 @@ def free_space_propagate(wavefront, h=None,
     wavefront_ft *= h
 
     # Inverse Fourier Transform
-    return ifft2(wavefront_ft)
+    return tf.signal.ifft2d(wavefront_ft)
