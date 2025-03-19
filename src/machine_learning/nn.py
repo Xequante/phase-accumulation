@@ -1,8 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from keras.models import Sequential
-from keras.layers import Conv2D, Conv2DTranspose, Reshape, Dense, Layer, Flatten
-from src.machine_learning.mplc_error import MPLCLoss
+from keras.layers import Conv2D, Reshape, Dense, Layer, Flatten
 
 
 class ModulusActivation(Layer):
@@ -60,7 +59,7 @@ def create_neural_net(k=4, n=20, m=20, phase_restriction=2*np.pi/3, method=1, **
     (n x m) matrix input and (k x n x m) output.
     """
 
-    print(f'{phase_restriction / np.pi}' + r'$\pi$')
+    # print(f'{phase_restriction / np.pi}' + r'$\pi$')
 
     # Create a sequential model
     if method == 1:
@@ -72,6 +71,7 @@ def create_neural_net(k=4, n=20, m=20, phase_restriction=2*np.pi/3, method=1, **
             # Reshape the output to use in a dense layer, assuming we flatten it and then expand again
             Flatten(),  # Flatten the output of the conv layers
             Dense(64, activation='relu'),  # Dense layer that processes the features
+            Dense(128, activation='relu'),
             Dense(n * m * k, activation='relu'), 
             Reshape((n, m, k)),
 

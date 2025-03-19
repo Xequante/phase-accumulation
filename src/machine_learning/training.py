@@ -2,12 +2,48 @@ import sys
 import os
 from pathvalidate import ValidationError, validate_filename
 
+import numpy  as np
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras import Model
 
 from src.machine_learning.nn import ModulusActivation, ResizeLayer, TransposeLayer
 from src.machine_learning.generate_data import generate_data
+
+
+def train_pnn(model, input_field=None, output_field=None, batch_size=32,
+              steps_per_epoch=100, epochs=10, model_path=None, **kwargs):
+    
+    # Check for missing inputs
+    if model_path is None:
+        raise SyntaxError('Must input a model_path')
+    
+    # Compile path into a valid name
+    current_directory = os.getcwd()
+    full_path = os.path.normpath(os.path.join(current_directory, model_path))
+
+    # Ensure the directory exists
+    absolute_path = os.path.abspath(full_path)
+    os.makedirs(os.path.dirname(absolute_path), exist_ok=True)
+    
+    # # Tile the input and output data
+    # n, m = input_field.shape
+    # input_tiled = np.broadcast_to(input_field, (batch_size, n, m))
+    # output_tiled = np.broadcast_to(output_field, (batch_size, n, m))
+    
+    # # Train the model on a single input, output pair
+    # train_dataset = (input_tiled, output_tiled)
+    # model.fit(train_dataset, steps_per_epoch=steps_per_epoch, epochs=epochs)  
+
+    # Perform the training on the input_field-output_field pair
+    train_dataset = tf.data.Dataset.from_tensors((input_field, output_field))
+    train_dataset = train_dataset.repeat()
+    train_dataset = train_dataset.batch(batch_size)
+    history = model.fit(train_dataset, steps_per_epoch=steps_per_epoch, epochs=epochs)
+
+    # Save the trained model
+    model.save_weights(model_path)
+    return history
 
 
 def train_model(model, steps_per_epoch=100, epochs=30, batch_size=32, 

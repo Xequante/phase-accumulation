@@ -28,7 +28,7 @@ def mplc_propagate(wavefront, mask, **kwargs):
 
 def free_space_propagate(wavefront, h=None,
                          wavelength=None, distance=None,
-                         x=None, y=None, dx=None, dy=None):
+                         x=None, y=None, dx=None, dy=None, **kwargs):
     """
     Takes an wavefront and phase mask and finds the resulting field after
     propagating some distance
