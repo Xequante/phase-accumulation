@@ -108,7 +108,7 @@ def loss_analysis(epochs=40, steps_per_epoch=100, batch_size=32,
                 model.compile(optimizer='adam', 
                             loss=PNNLoss(),
                             metrics=['accuracy'])
-                history = train_pnn(model, model_path=model_path, callbacks=training_callbacks,
+                history = train_pnn(model, model_path=model_path, 
                                     epochs=epochs, steps_per_epoch=steps_per_epoch, 
                                     batch_size=batch_size, **parameters)
 

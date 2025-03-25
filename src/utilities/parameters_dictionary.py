@@ -43,7 +43,7 @@ def parameters_dictionary(n: int = 60,
         phase = arctan2(Y, X)
         output_field = np.exp(1j * phase)
     elif output_index == 2:
-        output_field = lg_mode(X, Y, w0 = 10*dx)
+        output_field = lg_mode(X, Y, w0 = (n/6)*dx)
     else:
         raise SyntaxError(f'"{output_index}" is not a valid entry for <output_index>')
     

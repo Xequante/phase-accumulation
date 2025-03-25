@@ -12,7 +12,9 @@ from src.machine_learning.generate_data import generate_data
 
 
 def train_pnn(model, input_field=None, output_field=None, batch_size=32,
-              steps_per_epoch=100, epochs=10, model_path=None, **kwargs):
+              steps_per_epoch=100, epochs=80, model_path=None, 
+              callbacks=None,
+              **kwargs):
     
     # Check for missing inputs
     if model_path is None:
@@ -25,21 +27,16 @@ def train_pnn(model, input_field=None, output_field=None, batch_size=32,
     # Ensure the directory exists
     absolute_path = os.path.abspath(full_path)
     os.makedirs(os.path.dirname(absolute_path), exist_ok=True)
-    
-    # # Tile the input and output data
-    # n, m = input_field.shape
-    # input_tiled = np.broadcast_to(input_field, (batch_size, n, m))
-    # output_tiled = np.broadcast_to(output_field, (batch_size, n, m))
-    
-    # # Train the model on a single input, output pair
-    # train_dataset = (input_tiled, output_tiled)
-    # model.fit(train_dataset, steps_per_epoch=steps_per_epoch, epochs=epochs)  
 
     # Perform the training on the input_field-output_field pair
-    train_dataset = tf.data.Dataset.from_tensors((input_field, output_field))
-    train_dataset = train_dataset.repeat()
+    base_dataset = tf.data.Dataset.from_tensors((input_field, output_field))
+    validation_dataset = base_dataset.batch(1)
+    train_dataset = base_dataset.repeat()
     train_dataset = train_dataset.batch(batch_size)
-    history = model.fit(train_dataset, steps_per_epoch=steps_per_epoch, epochs=epochs)
+    history = model.fit(
+        train_dataset, 
+        validation_data=validation_dataset, callbacks=callbacks,
+        steps_per_epoch=steps_per_epoch, epochs=epochs)
 
     # Save the trained model
     model.save_weights(model_path)

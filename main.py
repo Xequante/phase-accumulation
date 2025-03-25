@@ -14,22 +14,37 @@ import tensorflow as tf
 
 def main():
 
-    # Generate a dictionary with necessary physical parameters
-    parameters = parameters_dictionary(phase_restriction=pi, k=4, output_index=2)
+    # Define the EarlyStopping callback
+    early_stopping = tf.keras.callbacks.EarlyStopping(
+        monitor='val_loss',  # Monitor validation loss
+        patience=5,  # Number of epochs to wait before stopping after no improvement
+        restore_best_weights=True,  # Restore model to the best epoch's weights
+        min_delta=1e-4,  # Minimum change to be considered an improvement
+        verbose=1  # Print messages when stopping
+    )
 
-    # Run loss analysis
-    k_vals = [6, 10]
-    loss_analysis(min_phase=pi/8, max_phase=3*pi / 4, num_models=20, 
-                  load=True, only_load=False, k_vals=k_vals, 
-                  extra_plots=False, only_plot=False,
-                  label='LG', 
-                  **parameters)
+    # Create list of callbacks to be used while training
+    callbacks = [early_stopping]
+
+    # Generate a dictionary with necessary physical parameters
+    parameters = parameters_dictionary(phase_restriction=0.75 * np.pi, 
+                                       n=300, m=300, k=3, output_index=2)
+    parameters['callbacks'] = callbacks
+
+    # # Run loss analysis
+    # k_vals = [6, 8, 10]
+    # loss_analysis(min_phase=pi/8, max_phase=3*pi / 4, num_models=39, 
+    #               load=True, only_load=False, k_vals=k_vals, 
+    #               extra_plots=False, only_plot=False,
+    #               label='LG', 
+    #               epochs=80, steps_per_epoch=50,
+    #               **parameters)
 
     # Define a path where the model will be saved
-    # model_path = 'resources/neural_nets/pnn_model_1_mask.h5'
+    model_path = 'resources/neural_nets/pnn_experiment_model_mask.h5'
 
     # Create and train the model
-    # create_pnn_model(model_path, **parameters)
+    create_pnn_model(model_path, **parameters)
 
     # pnn_extra_training(model_path, epochs=1, **parameters)
     # # check_pnn_model(model_path, **parameters)
