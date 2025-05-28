@@ -1,10 +1,12 @@
 from nptyping import NDArray
+import numpy as np
 from numpy import min, max, meshgrid, pi, sqrt, exp, arange
 from numpy.fft import fftfreq, fftshift, ifftshift
 
 
 def compute_FSTF(input_field, output_field, dx, dy,
-                 distance, wavelength, k_space_filter: float = 1.0):
+                 distance, wavelength,
+                 k_space_filter: int = None):
 
     # Ensure the input and output fields have the same shape
     shape = input_field.shape
@@ -21,11 +23,12 @@ def compute_FSTF(input_field, output_field, dx, dy,
     h = free_space_transfer_function(x, y, distance, wavelength)
 
     # Filter the transfer function
-    if k_space_filter < 1:
-        radius = sqrt(x ** 2 + y ** 2)
-        max_radius = max(radius)
-        frequency_mask = radius < max_radius * k_space_filter
-        h *= ifftshift(frequency_mask)
+    if k_space_filter is not None:
+        if k_space_filter < 1:
+            radius = sqrt(x ** 2 + y ** 2)
+            max_radius = max(radius)
+            frequency_mask = radius < max_radius * k_space_filter
+            h *= ifftshift(frequency_mask)
 
     # return the result
     return h
@@ -56,8 +59,8 @@ def free_space_transfer_function(x, y, z, wavelength, shift=False):
 
     # Get x and y coordinates
     ny, nx = x.shape
-    dx = (max(x) - min(x)) / (nx - 1)
-    dy = (max(y) - min(y)) / (ny - 1)
+    dx = x[0, 1] - x[0, 0]
+    dy = y[1, 0] - y[0, 0]
 
     # Get k-space coordinates for the Fourier transform
     if shift:

@@ -5,7 +5,7 @@ from numpy import ones, arange, meshgrid, pi, arctan2
 from scipy.special import genlaguerre
 
 import numpy as np
-import tensorflow as tf
+# import tensorflow as tf
 import matplotlib.pyplot as plt
 
 
@@ -20,7 +20,7 @@ def parameters_dictionary(n: int = 60,
                           input_index: int = 0,
                           output_index: int = 0) -> dict:
     """
-    Creates a dictionary of key word arguments with any physical parameters for the system
+    Create kwargs dictionary with any physical parameters for the system
     """
 
     # Generate the free space transfer function
@@ -28,7 +28,7 @@ def parameters_dictionary(n: int = 60,
     y = dy * (arange(n) - n/2)
     X, Y = meshgrid(x, y)
     h = free_space_transfer_function(X, Y, distance, wavelength)
-    h = tf.convert_to_tensor(h, dtype=tf.complex64)
+    # h = tf.convert_to_tensor(h, dtype=tf.complex64)
 
     # Define the input field
     if input_index == 0:
@@ -43,12 +43,13 @@ def parameters_dictionary(n: int = 60,
         phase = arctan2(Y, X)
         output_field = np.exp(1j * phase)
     elif output_index == 2:
-        output_field = lg_mode(X, Y, w0 = (n/6)*dx)
+        output_field = lg_mode(X, Y, w0=(n/6)*dx)
     else:
         raise SyntaxError(f'"{output_index}" is not a valid entry for <output_index>')
     
     # Calculate the minimum possible loss for this input/output
     min_loss = - np.sqrt(np.sum(np.abs(input_field)**2) * np.sum(np.abs(output_field)**2))
+    print(min_loss, min_loss * 32)
 
     # Show the target output field
     fig, axs = plt.subplots(1, 2)
